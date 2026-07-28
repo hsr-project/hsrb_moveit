@@ -1,7 +1,7 @@
 <package format="3">
   <name>hsrb_moveit_plugins</name>
-  <version>2.1.0</version>
-  <description>HSR-specific plugins for MoveIt</description>
+  <version>3.0.0</version>
+  <description>HSR specific plugins for MoveIt</description>
   <maintainer email="xr-hsr-support@mail.toyota.co.jp">HSR Support</maintainer>
   <author>Koji Terada</author>
   <license>BSD 3-clause Clear License</license>

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2025 TOYOTA MOTOR CORPORATION
+# Copyright (c) 2026 TOYOTA MOTOR CORPORATION
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted (subject to the limitations in the disclaimer
@@ -61,6 +61,7 @@ def launch_setup(context, example_name, description_package, description_file):
     robot_description_moveit = robot_description.parse(description_package_str, description_file_str)
     robot_description_semantic = {'robot_description_semantic': load_file('config/hsrb.srdf')}
     kinematics_yaml = load_yaml('config/kinematics.yaml')
+    robot_description_kinematics = {'robot_description_kinematics': kinematics_yaml}
     robot_name = {'robot_name': LaunchConfiguration('robot_name')}
 
     example_name_str = context.perform_substitution(example_name)
@@ -71,7 +72,7 @@ def launch_setup(context, example_name, description_package, description_file):
                                        'use_sim_time': LaunchConfiguration('use_sim_time')},
                                       robot_description_semantic,
                                       robot_name,
-                                      kinematics_yaml])
+                                      robot_description_kinematics])
 
     return [commander_node]
 

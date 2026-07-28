@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2025 TOYOTA MOTOR CORPORATION
+Copyright (c) 2026 TOYOTA MOTOR CORPORATION
 All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted (subject to the limitations in the disclaimer
@@ -54,16 +54,16 @@ void HSRBKinematicsPluginTest::SetUp() {
   DeclareRobotDescription(node_);
 }
 
-// Test of initialization
+// Test for initialize
 TEST_F(HSRBKinematicsPluginTest, initialize) {
   {
-    // It succeeds even if nothing is configured
+    // It succeeds even without any specific settings
     HSRBKinematicsPlugin p;
     EXPECT_TRUE(p.initialize(node_, *robot_model_, "group", "odom", {"hand_palm_link"}, 0.0));
   }
 }
 
-// Test of getLinkNames
+// Test for getLinkNames
 TEST_F(HSRBKinematicsPluginTest, getLinkNames) {
   HSRBKinematicsPlugin p;
   EXPECT_TRUE(p.initialize(node_, *robot_model_, "group", "odom", {"hand_palm_link"}, 0.0));
@@ -80,7 +80,7 @@ TEST_F(HSRBKinematicsPluginTest, getLinkNames) {
   EXPECT_NE(std::find(link_names.begin(), link_names.end(), "wrist_roll_link"), link_names.end());
 }
 
-// Test of getJointNames
+// Test for getJointNames
 TEST_F(HSRBKinematicsPluginTest, getJointNames) {
   HSRBKinematicsPlugin p;
   EXPECT_TRUE(p.initialize(node_, *robot_model_, "group", "odom", {"hand_palm_link"}, 0.0));
@@ -97,7 +97,7 @@ TEST_F(HSRBKinematicsPluginTest, getJointNames) {
   EXPECT_NE(std::find(joint_names.begin(), joint_names.end(), "wrist_roll_joint"), joint_names.end());
 }
 
-// Test of supportsGroup
+// Test for supportsGroup
 TEST_F(HSRBKinematicsPluginTest, supportsGroup) {
   HSRBKinematicsPlugin p;
   EXPECT_TRUE(p.initialize(node_, *robot_model_, "group", "odom", {"hand_palm_link"}, 0.0));
@@ -168,7 +168,7 @@ TEST_F(HSRBKinematicsPluginTest, searchPositionIKWithDeclaredWeight) {
   EXPECT_NEAR(0.0352144,   solution[7], 1e-6);
 }
 
-// When there is no solution
+// When no solution is found
 TEST_F(HSRBKinematicsPluginTest, searchPositionIKNoSolution) {
   HSRBKinematicsPlugin p;
   EXPECT_TRUE(p.initialize(node_, *robot_model_, "group", "odom", {"hand_palm_link"}, 0.0));
@@ -210,7 +210,7 @@ TEST_F(HSRBKinematicsPluginTest, searchPositionIKNotActive) {
   EXPECT_FALSE(p.searchPositionIK(ik_pose, ik_seed_state, 0, solution, error_code));
 }
 
-// Dimension is invalid
+// Invalid dimension
 TEST_F(HSRBKinematicsPluginTest, searchPositionIKInvalidDimension) {
   HSRBKinematicsPlugin p;
   EXPECT_TRUE(p.initialize(node_, *robot_model_, "group", "odom", {"hand_palm_link"}, 0.0));
@@ -231,7 +231,7 @@ TEST_F(HSRBKinematicsPluginTest, searchPositionIKInvalidDimension) {
   EXPECT_FALSE(p.searchPositionIK(ik_pose, ik_seed_state, 0, solution, error_code));
 }
 
-// Size of consistency_limits is invalid
+// Invalid size of consistency_limits
 TEST_F(HSRBKinematicsPluginTest, searchPositionIKInvalidConsistencyLimits) {
   HSRBKinematicsPlugin p;
   EXPECT_TRUE(p.initialize(node_, *robot_model_, "group", "odom", {"hand_palm_link"}, 0.0));
@@ -266,7 +266,7 @@ TEST_F(HSRBKinematicsPluginTest, getPositionIK) {
   EXPECT_TRUE(p.getPositionFK({"hand_palm_link"}, joint_angles, poses));
   ASSERT_EQ(poses.size(), 1);
 
-  // The answer was displayed and created
+  // Displayed and created the answer
   EXPECT_NEAR(poses[0].position.x, 0.158, 1e-6);
   EXPECT_NEAR(poses[0].position.y, 0.078, 1e-6);
   EXPECT_NEAR(poses[0].position.z, 0.8255, 1e-6);
@@ -275,7 +275,7 @@ TEST_F(HSRBKinematicsPluginTest, getPositionIK) {
   EXPECT_NEAR(std::abs(poses[0].orientation.z), 1, 1e-6);
   EXPECT_NEAR(poses[0].orientation.w, 0, 1e-6);
 
-  // base_footprint also FK
+  // FK for base_footprint as well
   joint_angles[0] = 1.0;
   EXPECT_TRUE(p.getPositionFK({"hand_palm_link", "base_footprint"}, joint_angles, poses));
   ASSERT_EQ(poses.size(), 2);
@@ -298,7 +298,7 @@ TEST_F(HSRBKinematicsPluginTest, getPositionIK) {
 
   // Fails if the link does not exist
   EXPECT_FALSE(p.getPositionFK({"dummy"}, joint_angles, poses));
-  // FK fails if there aren't 8 joint angles
+  // FK fails if there are not 8 joint angles
   EXPECT_FALSE(p.getPositionFK({"hand_palm_link"}, std::vector<double>(7, 0.0), poses));
   EXPECT_FALSE(p.getPositionFK({"hand_palm_link"}, std::vector<double>(9, 0.0), poses));
 }
