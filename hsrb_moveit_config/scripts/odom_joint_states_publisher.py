@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025 TOYOTA MOTOR CORPORATION
+# Copyright (c) 2026 TOYOTA MOTOR CORPORATION
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted (subject to the limitations in the disclaimer
@@ -34,7 +34,7 @@ from sensor_msgs.msg import JointState
 class OdomJointStatePublisher(Node):
 
     def __init__(self):
-        """Node that publishes odom_x/y/t as JointState, use that one once the migration of topic_tools to ROS2 is complete"""
+        """A node that publishes odom_x/y/t as JointState; once the ROS 2 migration of topic_tools is complete, use that instead."""
         super().__init__('odom_joint_state_publisher')
         self._publisher = self.create_publisher(JointState, 'odom_joint_states', 1)
         self._subscription = self.create_subscription(
@@ -44,8 +44,8 @@ class OdomJointStatePublisher(Node):
         output = JointState()
         output.header = msg.header
         output.name = msg.joint_names
-        output.position = msg.actual.positions
-        output.velocity = msg.actual.velocities
+        output.position = msg.feedback.positions
+        output.velocity = msg.feedback.velocities
         self._publisher.publish(output)
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2025 TOYOTA MOTOR CORPORATION
+# Copyright (c) 2026 TOYOTA MOTOR CORPORATION
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted (subject to the limitations in the disclaimer
@@ -75,18 +75,26 @@ def generate_launch_description():
     robot_description_semantic = {'robot_description_semantic': load_file('config/hsrb.srdf')}
     robot_description_planning = {'robot_description_planning': load_yaml('config/joint_limits.yaml')}
     kinematics_yaml = load_yaml('config/kinematics.yaml')
+    robot_description_kinematics = {'robot_description_kinematics': kinematics_yaml}
     sensors_yaml = load_yaml('config/sensors_xtion.yaml')
     robot_name = {'robot_name': LaunchConfiguration('robot_name')}
 
     ompl_planning_pipeline_config = {
         'move_group': {
-            'planning_plugin': 'ompl_interface/OMPLPlanner',
-            'request_adapters': ' '.join(['default_planner_request_adapters/AddTimeOptimalParameterization',
-                                          'default_planner_request_adapters/FixWorkspaceBounds',
-                                          'default_planner_request_adapters/FixStartStateBounds',
-                                          'default_planner_request_adapters/FixStartStateCollision',
-                                          'default_planner_request_adapters/FixStartStatePathConstraints']),
-            'start_state_max_bounds_error': 0.1}}
+            'planning_plugins': ['ompl_interface/OMPLPlanner'],
+            'request_adapters': [
+                'default_planning_request_adapters/CheckForStackedConstraints',
+                'default_planning_request_adapters/ValidateWorkspaceBounds',
+                'default_planning_request_adapters/CheckStartStateBounds',
+                'default_planning_request_adapters/CheckStartStateCollision',
+                'default_planning_request_adapters/ResolveConstraintFrames',
+            ],
+            'response_adapters': [
+                'default_planning_response_adapters/AddTimeOptimalParameterization',
+            ],
+            'start_state_max_bounds_error': 0.1,
+        }
+    }
     ompl_planning_pipeline_config['move_group'].update(load_yaml('config/ompl_planning.yaml'))
 
     moveit_controllers = {
@@ -114,7 +122,7 @@ def generate_launch_description():
                            parameters=[robot_description,
                                        robot_description_semantic,
                                        robot_description_planning,
-                                       kinematics_yaml,
+                                       robot_description_kinematics,
                                        sensors_yaml,
                                        robot_name,
                                        ompl_planning_pipeline_config,
@@ -140,7 +148,7 @@ def generate_launch_description():
                                  namespace='whole_body_moveit',
                                  arguments=['/tmp/robot_description.urdf'],
                                  parameters=[{'source_list': ['/joint_states', '/odom_joint_states']}],
-                                 remappings=[('robot_description', '/robot_description')])
+                                 remappings=[('robot_description', 'dummy_robot_description')])
 
     rviz_node = Node(package='rviz2',
                      executable='rviz2',
@@ -149,7 +157,7 @@ def generate_launch_description():
                      parameters=[robot_description,
                                  robot_description_semantic,
                                  ompl_planning_pipeline_config,
-                                 kinematics_yaml,
+                                 robot_description_kinematics,
                                  {'use_sim_time': LaunchConfiguration('use_sim_time')}],
                      arguments=['-d', get_full_path('config/moveit.rviz')],
                      condition=IfCondition(LaunchConfiguration('use_rviz')))

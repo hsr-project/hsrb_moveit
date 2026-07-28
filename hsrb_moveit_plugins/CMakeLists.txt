@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(hsrb_moveit_plugins)
 
+set(Boost_USE_DEBUG_RUNTIME OFF)
+
 find_package(ament_cmake REQUIRED)
 find_package(hsrb_analytic_ik REQUIRED)
 find_package(moveit_core REQUIRED)

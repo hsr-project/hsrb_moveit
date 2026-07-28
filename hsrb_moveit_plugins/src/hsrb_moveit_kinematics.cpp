@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2025 TOYOTA MOTOR CORPORATION
+Copyright (c) 2026 TOYOTA MOTOR CORPORATION
 All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted (subject to the limitations in the disclaimer
@@ -43,6 +43,7 @@ static rclcpp::Logger LOGGER = rclcpp::get_logger("hsrb_moveit_plugins.hsrb_move
 using tmc_robot_kinematics_model::IKSolver;
 using tmc_manipulation_types::JointState;
 using tmc_robot_kinematics_model::IKRequest;
+using tmc_robot_kinematics_model::IKResponse;
 using tmc_robot_kinematics_model::IKResult;
 using tmc_robot_kinematics_model::kSuccess;
 
@@ -78,7 +79,7 @@ bool HSRBKinematicsPlugin::initialize(
   link_names_.push_back("wrist_flex_link");
   link_names_.push_back("wrist_roll_link");
 
-  // Utilized joint name
+  // Utilized joint names
   use_joints_.push_back("arm_lift_joint");
   use_joints_.push_back("arm_flex_joint");
   use_joints_.push_back("arm_roll_joint");
@@ -188,38 +189,33 @@ bool HSRBKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_p
 
   solution.resize(dimension_);
 
-  // Transform hand target position
+  // Convert end-effector target position
   Eigen::Affine3d ref_origin_to_end;
   tf2::fromMsg(ik_pose, ref_origin_to_end);
 
-  // Initial joint values for numerical IK
+  // Initial values for numerical IK joints
   Eigen::VectorXd init_angle;
   init_angle.resize(dimension_ - 3);
   for (int i = 0; i < dimension_ - 3; ++i) {
     init_angle[i] = ik_seed_state[i + 3];
   }
 
-  // Set the degrees of freedom of the platform to planar constraint (set to x, y, θ)
+  // Set planar constraints for the mobile base (x, y, θ)
   IKRequest req(tmc_manipulation_types::kPlanar);
-  req.frame_name = "hand_palm_link";
-  req.frame_to_end = Eigen::Affine3d::Identity();
+  req.target_frames.emplace_back("hand_palm_link", ref_origin_to_end);
   req.initial_angle.name = use_joints_;
   req.use_joints = use_joints_;
-  // Joint weights. The last three are for the platform.
+  // Joint weights, with the last three for the mobile base
   req.weight = Eigen::Map<const Eigen::VectorXd>(&weights_[0], weights_.size());
-  req.ref_origin_to_end = ref_origin_to_end;
   req.initial_angle.position = init_angle;
   req.origin_to_base = Eigen::Translation3d(ik_seed_state[0], ik_seed_state[1], 0)
                      * Eigen::AngleAxisd(ik_seed_state[2], Eigen::Vector3d::UnitZ());
 
-  JointState js_solution;
-  Eigen::Affine3d origin_to_hand_result;
-  Eigen::Affine3d origin_to_base_solution;
-  tmc_robot_kinematics_model::IKResult result;
-
-  result = solver_->Solve(req, js_solution, origin_to_base_solution, origin_to_hand_result);
-
+  std::vector<IKResponse> responses;
+  const auto result = solver_->Solve(req, responses);
   if (result == kSuccess) {
+    const auto& origin_to_base_solution = responses[0].origin_to_base;
+    const auto& js_solution = responses[0].solution_angle;
     Eigen::Vector3d euler_vector = origin_to_base_solution.rotation().eulerAngles(0, 1, 2);
 
     solution[0] = origin_to_base_solution.translation().x();
