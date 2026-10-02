@@ -7,10 +7,6 @@ Changelog for package hsrb_moveit
 * Migration to ROS2 jazzy
 * Contributors: Katsushi Fukuoka, Keisuke Takeshita
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package hsrb_moveit
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 2.1.1 (2025-12-25)
 -------------------
 * Removed not found when source install/setup.bash
